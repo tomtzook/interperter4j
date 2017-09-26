@@ -13,7 +13,7 @@ public class Token {
 	public TokenType getType(){
 		return type;
 	}
-	public Object getValue(){
+	public Object getToken(){
 		return value;
 	}
 	

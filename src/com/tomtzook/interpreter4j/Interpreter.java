@@ -9,105 +9,93 @@ public class Interpreter {
 
 	private Map<Object, OperatorToken> operators;
 	private Map<String, Function> functions;
+	private Map<String, VariableToken> variables;
 	
 	private List<Token> lineTokens;
 	private Token currentToken;
 	private String line;
 	private int pos, lineLength;
-	private StringBuilder stringBuilder;
+	private int currentChar;
 	
 	public Interpreter() {
 		operators = createDefaultOperatorMap();
 		functions = createDefaultFunctionMap();
+		variables = createDefaultVariablesMap();
 		
-		stringBuilder = new StringBuilder();
 		lineTokens = new ArrayList<Token>();
 	}
+	
+	//--------------------------------------------------------------------
+	//--------------------Parsing - General-------------------------------
+	//--------------------------------------------------------------------
 	
 	private void reset(String line){
 		pos = 0;
 		currentToken = null;
 		lineTokens.clear();
 		lineLength = line.length();
+		currentChar = line.charAt(0);
 		this.line = line;
 	}
 	
 	private void parsingError(String msg){
-		throw new RuntimeException("Parsing Error: "+msg);
+		throw new RuntimeException("Parsing Error("+pos+"): "+msg);
 	}
 	
-	
-	private void eat(TokenType type){
-		if(currentToken.getType() == type)
-			currentToken = nextToken();
-		else
-			parsingError("Expected: "+type.toString());
+	private void nextChar(){
+		currentChar = (++pos < lineLength) ? line.charAt(pos) : -1;
 	}
-	private char peekChar(){
-		if(pos >= lineLength)
-			return 0;
-		return line.charAt(pos);
+	private void skipspaces(){
+		while(Character.isSpaceChar(currentChar))
+			nextChar();
 	}
-	private char nextChar(){
-		char val = peekChar();
-		++pos;
-		return val;
-	}
-	
-	private Token parseNumberToken(){
-		char current = peekChar();
 		
-		if(Character.isDigit(current)){
-			stringBuilder.setLength(0);
-			stringBuilder.append(current);
-			
-			current = peekChar();
-			
-			while(Character.isDigit(current)){
-				current = nextChar();
-				stringBuilder.append(current);
-			}
-			
-			double value = 0.0;
-			try{
-				value = Double.parseDouble(stringBuilder.toString());
-			}catch(NumberFormatException e){
-				parsingError("Expected digit: "+stringBuilder.toString());
-			}
-			return new NumberToken(value);
-		}
-		
-		return null;
-	}
-	private Token parseOperatorToken(){
-		char current = peekChar();
-		
-		if(operators.containsKey(current))
-			return operators.get(current);
-		
-		return null;
-	}
+	//--------------------------------------------------------------------
+	//---------------------Parsing - Tokens-------------------------------
+	//--------------------------------------------------------------------
 	
 	private Token nextToken(){
 		if(pos >= line.length())
 			return null;
 		
-		Token token = null;
+		int start;
 		
-		nextChar();
-		
-		//is number
-		token = parseNumberToken();
-		if(token != null)
-			return token;
-		
-		//is operator
-		token = parseOperatorToken();
-		if(token != null)
-			return token;
+		while(currentChar != 0){
+			start = pos;
+			
+			//skip whitespaces
+			if(Character.isWhitespace(currentChar)){
+				skipspaces();
+				continue;
+			}
+			
+			//is number
+			if(Character.isDigit(currentChar) || currentChar == '.'){
+	            while(Character.isDigit(currentChar) || currentChar == '.') 
+	            	nextChar();
+	            double value = Double.parseDouble(line.substring(start, this.pos));
+	            return new NumberToken(value);
+			}
+			
+			//is operator
+			int chartype = Character.getType(currentChar);
+			if(chartype == Character.MATH_SYMBOL || chartype == Character.OTHER_PUNCTUATION || 
+					chartype == Character.DASH_PUNCTUATION){
+				while(chartype == Character.MATH_SYMBOL || chartype == Character.OTHER_PUNCTUATION || 
+						chartype == Character.DASH_PUNCTUATION){
+					nextChar();
+					chartype = Character.getType(currentChar);
+				}
+				
+				String strval = line.substring(start, pos);
+				if(operators.containsKey(strval))
+					return operators.get(strval);
+			}
+			
+			//unknown symbol
+			parsingError("Unexpected character: "+currentChar);
+		}
 
-		//unknown symbol
-		parsingError("Invalid token: "+currentToken);
 		return null;
 	}
 	
@@ -122,26 +110,47 @@ public class Interpreter {
 		}
 	}
 	
+	//--------------------------------------------------------------------
+	//-------------------Parsing - Operations-----------------------------
+	//--------------------------------------------------------------------
+	
+	public void performOperations(){
+		
+	}
+	
+	//--------------------------------------------------------------------
+	//-----------------------Evaluating-----------------------------------
+	//--------------------------------------------------------------------
+	
 	public void evaluate(String line){
 		reset(line);
 		parseTokens();
+		performOperations();
 	}
 	
+	//--------------------------------------------------------------------
+	//------------------------Static--------------------------------------
+	//--------------------------------------------------------------------
 	
 	public static Map<Object, OperatorToken> createDefaultOperatorMap(){
-		Map<Object, OperatorToken> operators = new HashMap<Object, OperatorToken>();
+		Map<Object, OperatorToken> map = new HashMap<Object, OperatorToken>();
 		
-		operators.put(OperatorToken.ASSIGNEMENT.getValue(), OperatorToken.ASSIGNEMENT);
-		operators.put(OperatorToken.ADDITION.getValue(), OperatorToken.ADDITION);
-		operators.put(OperatorToken.SUBTRACTION.getValue(), OperatorToken.SUBTRACTION);
-		operators.put(OperatorToken.MULTIPLICATION.getValue(), OperatorToken.MULTIPLICATION);
-		operators.put(OperatorToken.DIVISION.getValue(), OperatorToken.DIVISION);
+		map.put(OperatorToken.ASSIGNEMENT.getToken(), OperatorToken.ASSIGNEMENT);
+		map.put(OperatorToken.ADDITION.getToken(), OperatorToken.ADDITION);
+		map.put(OperatorToken.SUBTRACTION.getToken(), OperatorToken.SUBTRACTION);
+		map.put(OperatorToken.MULTIPLICATION.getToken(), OperatorToken.MULTIPLICATION);
+		map.put(OperatorToken.DIVISION.getToken(), OperatorToken.DIVISION);
 		
-		return operators;
+		return map;
 	}
 	public static Map<String, Function> createDefaultFunctionMap(){
-		Map<String, Function> operators = new HashMap<String, Function>();
+		Map<String, Function> map = new HashMap<String, Function>();
 		
-		return operators;
+		return map;
+	}
+	public static Map<String, VariableToken> createDefaultVariablesMap(){
+		Map<String, VariableToken> map = new HashMap<String, VariableToken>();
+		
+		return map;
 	}
 }
