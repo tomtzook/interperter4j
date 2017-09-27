@@ -23,6 +23,19 @@ public class Interpreter {
 	}
 	
 	//--------------------------------------------------------------------
+	//-----------------------Settings-------------------------------------
+	//--------------------------------------------------------------------
+	
+	public Interpreter variable(VariableToken variable){
+		variables.put(variable.getToken(), variable);
+		return this;
+	}
+	public Interpreter function(Function function){
+		functions.put(function.getName(), function);
+		return this;
+	}
+	
+	//--------------------------------------------------------------------
 	//-----------------------Evaluating-----------------------------------
 	//--------------------------------------------------------------------
 	
@@ -55,6 +68,13 @@ public class Interpreter {
 		map.put(OperatorToken.LOGICAL_AND.getToken(), OperatorToken.LOGICAL_AND);
 		map.put(OperatorToken.LOGICAL_OR.getToken(), OperatorToken.LOGICAL_OR);
 		
+		map.put(OperatorToken.EQUAL_TO.getToken(), OperatorToken.EQUAL_TO);
+		map.put(OperatorToken.NOT_EQUAL_TO.getToken(), OperatorToken.NOT_EQUAL_TO);
+		map.put(OperatorToken.BIGGER_THAN.getToken(), OperatorToken.BIGGER_THAN);
+		map.put(OperatorToken.SMALLER_THAN.getToken(), OperatorToken.SMALLER_THAN);
+		map.put(OperatorToken.BIGGER_EQUAL_TO.getToken(), OperatorToken.BIGGER_EQUAL_TO);
+		map.put(OperatorToken.SMALLER_EQUAL_TO.getToken(), OperatorToken.SMALLER_EQUAL_TO);
+		
 		return map;
 	}
 	public static Map<String, Function> createDefaultFunctionMap(){
@@ -63,8 +83,14 @@ public class Interpreter {
 		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
 		map.put(Function.MATH_ABS.getName(), Function.MATH_ABS);
 		map.put(Function.MATH_SQRT.getName(), Function.MATH_SQRT);
+		map.put(Function.MATH_RAD.getName(), Function.MATH_RAD);
+		map.put(Function.MATH_DEG.getName(), Function.MATH_DEG);
+		map.put(Function.MATH_SIN.getName(), Function.MATH_SIN);
+		map.put(Function.MATH_COS.getName(), Function.MATH_COS);
+		map.put(Function.MATH_TAN.getName(), Function.MATH_TAN);
 		
 		map.put(Function.PRINT.getName(), Function.PRINT);
+		map.put(Function.NOT.getName(), Function.NOT);
 		
 		return map;
 	}

@@ -19,6 +19,15 @@ public abstract class Function {
 			return null;
 		}
 	};
+	public static final Function NOT = new Function("not", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Boolean)
+				functionException("Expected boolean argument", this);
+			
+			return new BooleanToken(!(boolean)tokens[0].getToken());
+		}
+	};
 	
 	//--------------------------------------------------------------------
 	//-----------------------MATH FUNCS-----------------------------------
@@ -31,7 +40,7 @@ public abstract class Function {
 				functionException("Expected number arguments", this);
 				
 			NumberToken base = (NumberToken)tokens[0];
-			NumberToken exp = (NumberToken)tokens[0];
+			NumberToken exp = (NumberToken)tokens[1];
 			
 			return new NumberToken(
 					Math.pow(
@@ -61,6 +70,62 @@ public abstract class Function {
 			NumberToken num = (NumberToken)tokens[0];
 			
 			return new NumberToken(Math.sqrt(num.doubleValue()));
+		}
+	};
+	
+	public static final Function MATH_SIN = new Function("sin", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.sin(Math.toRadians(num.doubleValue())));
+		}
+	};
+	public static final Function MATH_COS = new Function("cos", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.cos(Math.toRadians(num.doubleValue())));
+		}
+	};
+	public static final Function MATH_TAN = new Function("tan", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.tan(Math.toRadians(num.doubleValue())));
+		}
+	};
+	public static final Function MATH_RAD = new Function("rad", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.toRadians(num.doubleValue()));
+		}
+	};
+	public static final Function MATH_DEG = new Function("deg", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.toDegrees(num.doubleValue()));
 		}
 	};
 	

@@ -83,7 +83,7 @@ public abstract class OperatorToken extends Token{
 	};
 	
 	//--------------------------------------------------------------------
-	//--------------------------BOOLEAN-----------------------------------
+	//--------------------------LOGICAL-----------------------------------
 	//--------------------------------------------------------------------
 	
 	public static final OperatorToken LOGICAL_OR = new OperatorToken("||", OperatorType.Expression){
@@ -108,6 +108,81 @@ public abstract class OperatorToken extends Token{
 			boolean rightval = (boolean)right.getToken();
 			
 			return new BooleanToken(leftval && rightval);
+		}
+	};
+	
+	
+	public static final OperatorToken EQUAL_TO = new OperatorToken("==", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() == numr.doubleValue());
+		}
+	};
+	public static final OperatorToken NOT_EQUAL_TO = new OperatorToken("!=", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() != numr.doubleValue());
+		}
+	};
+	public static final OperatorToken BIGGER_THAN = new OperatorToken(">", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() > numr.doubleValue());
+		}
+	};
+	public static final OperatorToken SMALLER_THAN = new OperatorToken("<", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() < numr.doubleValue());
+		}
+	};
+	
+	public static final OperatorToken BIGGER_EQUAL_TO = new OperatorToken(">=", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() >= numr.doubleValue());
+		}
+	};
+	public static final OperatorToken SMALLER_EQUAL_TO = new OperatorToken("<=", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new BooleanToken(numl.doubleValue() <= numr.doubleValue());
 		}
 	};
 	
