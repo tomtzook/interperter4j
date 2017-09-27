@@ -3,6 +3,22 @@ package com.tomtzook.interpreter4j;
 public abstract class OperatorToken extends Token{
 	
 	//--------------------------------------------------------------------
+	//-----------------------ASSIGNMENT-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static final OperatorToken ASSIGNMENT = new OperatorToken("=", OperatorType.Expression){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Variable)
+				operatorException("Expected left hand variable token", this);
+			
+			((VariableToken)left).setValue(right);
+			
+			return left;
+		}
+	};
+	
+	//--------------------------------------------------------------------
 	//-----------------------ARITHMETIC-----------------------------------
 	//--------------------------------------------------------------------
 	
@@ -91,6 +107,10 @@ public abstract class OperatorToken extends Token{
 			return new BooleanToken(leftval && rightval);
 		}
 	};
+	
+	//--------------------------------------------------------------------
+	//-----------------------CLASS DEF------------------------------------
+	//--------------------------------------------------------------------
 	
 	private OperatorType optype;
 	

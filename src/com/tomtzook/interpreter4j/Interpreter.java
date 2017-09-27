@@ -10,8 +10,8 @@ import java.util.Queue;
 public class Interpreter {
 	
 	private Map<Object, OperatorToken> operators;
-	//private Map<String, Function> functions;
-	//private Map<String, VariableToken> variables;
+	private Map<String, Function> functions;
+	private Map<String, VariableToken> variables;
 	
 	private Queue<Token> lineTokens;
 	private Token currentToken;
@@ -22,8 +22,8 @@ public class Interpreter {
 	
 	public Interpreter() {
 		operators = createDefaultOperatorMap();
-		//functions = createDefaultFunctionMap();
-		//variables = createDefaultVariablesMap();
+		functions = createDefaultFunctionMap();
+		variables = createDefaultVariablesMap();
 		
 		lineTokens = new ArrayDeque<Token>();
 	}
@@ -124,6 +124,18 @@ public class Interpreter {
 	            }else if(val.equals("false")){
 	            	return new BooleanToken(false);
 	            }
+	            
+	            //is a function: we have parentheses
+	            if(currentChar == '('){
+	            	if(!functions.containsKey(val))
+	            		parsingError("Unknown function: "+val);
+	            }
+	            
+	            //is a variable
+	            if(!variables.containsKey(val)){
+	            	variables.put(val, new VariableToken(val));
+	            }
+	            return variables.get(val);
 			}
 			
 			//unknown symbol
@@ -171,6 +183,18 @@ public class Interpreter {
 		if(currentToken.getType() == TokenType.Number || currentToken.getType() == TokenType.Boolean){
 			result = currentToken;
 			nextOpToken();
+		}
+		else if(currentToken.getType() == TokenType.Variable){
+			VariableToken variable = (VariableToken)currentToken;
+			nextOpToken();
+			if(currentToken.getType() == TokenType.Operator && 
+					currentToken.equals(OperatorToken.ASSIGNMENT)){
+				nextOpToken();
+				result = performExpression();
+				result = OperatorToken.ASSIGNMENT.apply(variable, result);
+			}else{
+				result = variable.getValue();
+			}
 		}
 		else if(eatOperator(OperatorType.Factor)){
 			OperatorToken operator = (OperatorToken)currentToken;
@@ -245,6 +269,8 @@ public class Interpreter {
 	public static Map<Object, OperatorToken> createDefaultOperatorMap(){
 		Map<Object, OperatorToken> map = new HashMap<Object, OperatorToken>();
 		
+		map.put(OperatorToken.ASSIGNMENT.getToken(), OperatorToken.ASSIGNMENT);
+		
 		map.put(OperatorToken.ADDITION.getToken(), OperatorToken.ADDITION);
 		map.put(OperatorToken.SUBTRACTION.getToken(), OperatorToken.SUBTRACTION);
 		map.put(OperatorToken.MULTIPLICATION.getToken(), OperatorToken.MULTIPLICATION);
@@ -262,6 +288,9 @@ public class Interpreter {
 	}
 	public static Map<String, VariableToken> createDefaultVariablesMap(){
 		Map<String, VariableToken> map = new HashMap<String, VariableToken>();
+		
+		map.put("pi", new VariableToken("test", new NumberToken(Math.PI)));
+		map.put("test", new VariableToken("test", new NumberToken(1)));
 		
 		return map;
 	}
