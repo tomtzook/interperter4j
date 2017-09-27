@@ -1,27 +1,12 @@
 package com.tomtzook.interpreter4j;
 
 public abstract class OperatorToken extends Token{
-
-	public static final OperatorToken ASSIGNEMENT = new OperatorToken("="){
-			@Override
-			public Token apply(Token left, Token right) {
-				if(left.getType() != TokenType.Variable)
-					operatorException("Expected left variable token", this);
-				if(right.getType() == TokenType.Function)
-					operatorException("Expected right number or variable token", this);
-				
-				VariableToken variable = (VariableToken)left;
-				
-				if(right.getType() == TokenType.Variable)
-					variable.setValue(((VariableToken)right).getValue());
-				else if(right.getType() == TokenType.Number)
-					variable.setValue(right.getToken());
-				
-				return null;
-			}
-	};
 	
-	public static final OperatorToken ADDITION = new OperatorToken("+"){
+	//--------------------------------------------------------------------
+	//-----------------------ARITHMETIC-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static final OperatorToken ADDITION = new OperatorToken("+", OperatorType.Expression){
 		@Override
 		public Token apply(Token left, Token right) {
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
@@ -35,7 +20,7 @@ public abstract class OperatorToken extends Token{
 			return new NumberToken((Integer)leftval + (Integer)rightval);
 		}
 	};
-	public static final OperatorToken SUBTRACTION = new OperatorToken("-"){
+	public static final OperatorToken SUBTRACTION = new OperatorToken("-", OperatorType.Expression){
 		@Override
 		public Token apply(Token left, Token right) {
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
@@ -49,7 +34,7 @@ public abstract class OperatorToken extends Token{
 			return new NumberToken((Integer)leftval - (Integer)rightval);
 		}
 	};
-	public static final OperatorToken MULTIPLICATION = new OperatorToken("*"){
+	public static final OperatorToken MULTIPLICATION = new OperatorToken("*", OperatorType.Term){
 		@Override
 		public Token apply(Token left, Token right) {
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
@@ -63,7 +48,7 @@ public abstract class OperatorToken extends Token{
 			return new NumberToken((Integer)leftval * (Integer)rightval);
 		}
 	};
-	public static final OperatorToken DIVISION = new OperatorToken("/"){
+	public static final OperatorToken DIVISION = new OperatorToken("/", OperatorType.Term){
 		@Override
 		public Token apply(Token left, Token right) {
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
@@ -78,8 +63,44 @@ public abstract class OperatorToken extends Token{
 		}
 	};
 	
-	public OperatorToken(Object value) {
+	//--------------------------------------------------------------------
+	//--------------------------BOOLEAN-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static final OperatorToken LOGICAL_OR = new OperatorToken("||", OperatorType.Expression){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Boolean || right.getType() != TokenType.Boolean)
+				operatorException("Expected boolean tokens", this);
+			
+			boolean leftval = (boolean)left.getToken();
+			boolean rightval = (boolean)right.getToken();
+			
+			return new BooleanToken(leftval || rightval);
+		}
+	};
+	public static final OperatorToken LOGICAL_AND = new OperatorToken("&&", OperatorType.Expression){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Boolean || right.getType() != TokenType.Boolean)
+				operatorException("Expected boolean tokens", this);
+			
+			boolean leftval = (boolean)left.getToken();
+			boolean rightval = (boolean)right.getToken();
+			
+			return new BooleanToken(leftval && rightval);
+		}
+	};
+	
+	private OperatorType optype;
+	
+	public OperatorToken(Object value, OperatorType type) {
 		super(value, TokenType.Operator);
+		this.optype = type;
+	}
+	
+	public OperatorType getOperatorType(){
+		return optype;
 	}
 	
 	public abstract Token apply(Token left, Token right);

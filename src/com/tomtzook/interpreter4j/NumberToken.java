@@ -8,4 +8,11 @@ public class NumberToken extends Token{
 	public NumberToken(int value) {
 		super(value, TokenType.Number);
 	}
+	
+	public int intValue(){
+		return (int)getToken();
+	}
+	public double doubleValue(){
+		return (double)getToken();
+	}
 }

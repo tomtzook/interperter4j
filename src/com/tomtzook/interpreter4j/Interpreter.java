@@ -1,28 +1,31 @@
 package com.tomtzook.interpreter4j;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 public class Interpreter {
-
-	private Map<Object, OperatorToken> operators;
-	private Map<String, Function> functions;
-	private Map<String, VariableToken> variables;
 	
-	private List<Token> lineTokens;
+	private Map<Object, OperatorToken> operators;
+	//private Map<String, Function> functions;
+	//private Map<String, VariableToken> variables;
+	
+	private Queue<Token> lineTokens;
 	private Token currentToken;
+	private Token lastToken;
 	private String line;
 	private int pos, lineLength;
 	private int currentChar;
 	
 	public Interpreter() {
 		operators = createDefaultOperatorMap();
-		functions = createDefaultFunctionMap();
-		variables = createDefaultVariablesMap();
+		//functions = createDefaultFunctionMap();
+		//variables = createDefaultVariablesMap();
 		
-		lineTokens = new ArrayList<Token>();
+		lineTokens = new ArrayDeque<Token>();
 	}
 	
 	//--------------------------------------------------------------------
@@ -73,8 +76,25 @@ public class Interpreter {
 			if(Character.isDigit(currentChar) || currentChar == '.'){
 	            while(Character.isDigit(currentChar) || currentChar == '.') 
 	            	nextChar();
-	            double value = Double.parseDouble(line.substring(start, this.pos));
-	            return new NumberToken(value);
+	            String strval = line.substring(start, this.pos);
+	            
+	            if(strval.contains(".")){
+		            double value = Double.parseDouble(strval);
+		            return new NumberToken(value);
+	            }else{
+		            int value = Integer.parseInt(strval);
+		            return new NumberToken(value);
+	            }
+			}
+			
+			//is parentheses
+			if(currentChar == '('){
+				nextChar();
+				return new Token('(', TokenType.Parentheses_L);
+			}
+			if(currentChar == ')'){
+				nextChar();
+				return new Token(')', TokenType.Parentheses_R);
 			}
 			
 			//is operator
@@ -90,6 +110,20 @@ public class Interpreter {
 				String strval = line.substring(start, pos);
 				if(operators.containsKey(strval))
 					return operators.get(strval);
+			}
+			
+			//is a string: function, variable, boolean
+			if(Character.isAlphabetic(currentChar) || currentChar == '_'){
+	            while(Character.isAlphabetic(currentChar) || currentChar == '_') 
+	            	nextChar();
+	            String val = line.substring(start, this.pos);
+	            
+	            //checking for boolean tokens
+	            if(val.equals("true")){
+	            	return new BooleanToken(true);
+	            }else if(val.equals("false")){
+	            	return new BooleanToken(false);
+	            }
 			}
 			
 			//unknown symbol
@@ -114,8 +148,82 @@ public class Interpreter {
 	//-------------------Parsing - Operations-----------------------------
 	//--------------------------------------------------------------------
 	
-	public void performOperations(){
+	private void operationError(String msg){
+		throw new RuntimeException("Operation Error:" + msg);
+	}
+	
+	public void nextOpToken(){
+		lastToken = currentToken;
+		currentToken = (lineTokens.isEmpty())? null : lineTokens.remove();
+	}
+	public boolean eatToken(TokenType type){
+		return currentToken != null && currentToken.getType() == type;
+	}
+	public boolean eatOperator(OperatorType type){
+		if(!eatToken(TokenType.Operator))
+			return false;
+		return ((OperatorToken)currentToken).getOperatorType() == type;
+	}
+	
+	public Token performFactor(){
+		Token result = null;
 		
+		if(currentToken.getType() == TokenType.Number || currentToken.getType() == TokenType.Boolean){
+			result = currentToken;
+			nextOpToken();
+		}
+		else if(eatOperator(OperatorType.Factor)){
+			OperatorToken operator = (OperatorToken)currentToken;
+			nextOpToken();
+			result = operator.apply(result, performExpression());
+		}
+		else if(currentToken.getType() == TokenType.Parentheses_L){
+			nextOpToken();
+			result = performExpression();
+			
+			if(currentToken.getType() != TokenType.Parentheses_R)
+				operationError("Expected parentheses closer");
+			nextOpToken();
+		}
+		
+		return result;
+	}
+	public Token performTerm(){
+		Token result = performFactor();
+		
+		OperatorToken operator;
+		
+		for(;;){
+			if(eatOperator(OperatorType.Term)){
+				operator = (OperatorToken)currentToken;
+				nextOpToken();
+				result = operator.apply(result, performFactor());
+			}else
+				return result;
+		}
+	}
+	public Token performExpression(){
+		Token result = performTerm();
+		OperatorToken operator;
+		
+		for(;;){
+			if(eatOperator(OperatorType.Expression)){
+				operator = (OperatorToken)currentToken;
+				nextOpToken();
+				result = operator.apply(result, performTerm());
+			}else
+				return result;
+		}
+	}
+	public void performOperations(){
+		nextOpToken();
+		Token token = performExpression();
+		
+		if(!lineTokens.isEmpty())
+			operationError("Unexpected tokens left");
+		
+		if(token != null)
+			System.out.println(token);
 	}
 	
 	//--------------------------------------------------------------------
@@ -124,7 +232,9 @@ public class Interpreter {
 	
 	public void evaluate(String line){
 		reset(line);
+		System.out.println("Parsing:");
 		parseTokens();
+		System.out.println("Operations:");
 		performOperations();
 	}
 	
@@ -135,11 +245,13 @@ public class Interpreter {
 	public static Map<Object, OperatorToken> createDefaultOperatorMap(){
 		Map<Object, OperatorToken> map = new HashMap<Object, OperatorToken>();
 		
-		map.put(OperatorToken.ASSIGNEMENT.getToken(), OperatorToken.ASSIGNEMENT);
 		map.put(OperatorToken.ADDITION.getToken(), OperatorToken.ADDITION);
 		map.put(OperatorToken.SUBTRACTION.getToken(), OperatorToken.SUBTRACTION);
 		map.put(OperatorToken.MULTIPLICATION.getToken(), OperatorToken.MULTIPLICATION);
 		map.put(OperatorToken.DIVISION.getToken(), OperatorToken.DIVISION);
+		
+		map.put(OperatorToken.LOGICAL_AND.getToken(), OperatorToken.LOGICAL_AND);
+		map.put(OperatorToken.LOGICAL_OR.getToken(), OperatorToken.LOGICAL_OR);
 		
 		return map;
 	}
