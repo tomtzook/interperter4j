@@ -3,6 +3,24 @@ package com.tomtzook.interpreter4j;
 public abstract class Function {
 
 	//--------------------------------------------------------------------
+	//-----------------------GENERAL FUNCS--------------------------------
+	//--------------------------------------------------------------------
+	
+	public static final Function PRINT = new Function("print", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			Token token = tokens[0];
+			if(token.getType() == TokenType.Variable)
+				token = ((VariableToken)token).getValue();
+			
+			if(token.getType() == TokenType.Number || token.getType() == TokenType.Boolean)
+				System.out.println("Interpreter: "+token.getToken());
+			
+			return null;
+		}
+	};
+	
+	//--------------------------------------------------------------------
 	//-----------------------MATH FUNCS-----------------------------------
 	//--------------------------------------------------------------------
 	

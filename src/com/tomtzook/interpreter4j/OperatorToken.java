@@ -12,7 +12,10 @@ public abstract class OperatorToken extends Token{
 			if(left.getType() != TokenType.Variable)
 				operatorException("Expected left hand variable token", this);
 			
-			((VariableToken)left).setValue(right);
+			if(right.getType() == TokenType.Variable)
+				((VariableToken)left).setValue(((VariableToken)right).getValue());
+			else
+				((VariableToken)left).setValue(right);
 			
 			return left;
 		}

@@ -2,6 +2,7 @@ package com.tomtzook.interpreter4j;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -153,7 +154,7 @@ public class Interpreter {
 		currentToken = nextToken();
 		while(currentToken != null){
 			
-			System.out.println(currentToken);
+			//System.out.println(currentToken);
 			
 			lineTokens.add(currentToken);
 			currentToken = nextToken();
@@ -285,8 +286,8 @@ public class Interpreter {
 		if(!lineTokens.isEmpty())
 			operationError("Unexpected tokens left");
 		
-		if(token != null)
-			System.out.println(token);
+		/*if(token != null)
+			System.out.println(token);*/
 	}
 	
 	//--------------------------------------------------------------------
@@ -299,6 +300,25 @@ public class Interpreter {
 		parseTokens();
 		System.out.println("Operations:");
 		performOperations();
+	}
+	public void evaluate(List<String> lines){
+		Queue<Queue<Token>> alltokens = new ArrayDeque<Queue<Token>>();
+		
+		//System.out.println("Parsing: ");
+		for (int i = 0; i < lines.size(); i++) {
+			Queue<Token> tokens = new ArrayDeque<Token>();
+			//System.out.println("Parsing line "+i);
+			lineTokens = tokens;
+			reset(lines.get(i));
+			parseTokens();
+			alltokens.add(tokens);
+		}
+		
+		//System.out.println("\nOperations: ");
+		while(!alltokens.isEmpty()){
+			lineTokens = alltokens.remove();
+			performOperations();
+		}
 	}
 	
 	//--------------------------------------------------------------------
@@ -326,6 +346,8 @@ public class Interpreter {
 		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
 		map.put(Function.MATH_ABS.getName(), Function.MATH_ABS);
 		map.put(Function.MATH_SQRT.getName(), Function.MATH_SQRT);
+		
+		map.put(Function.PRINT.getName(), Function.PRINT);
 		
 		return map;
 	}
