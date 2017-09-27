@@ -21,7 +21,7 @@ public abstract class Function {
 					exp.doubleValue()));
 		}
 	};
-	public static final Function MATH_ABS = new Function("pow", 2){
+	public static final Function MATH_ABS = new Function("abs", 1){
 		@Override
 		public Token apply(Token... tokens) {
 			if(tokens[0].getType() != TokenType.Number)
@@ -32,6 +32,17 @@ public abstract class Function {
 			if(num.isFloatingPoint())
 				return new NumberToken(Math.abs(num.intValue()));
 			return new NumberToken(Math.abs(num.doubleValue()));
+		}
+	};
+	public static final Function MATH_SQRT = new Function("sqrt", 1){
+		@Override
+		public Token apply(Token... tokens) {
+			if(tokens[0].getType() != TokenType.Number)
+				functionException("Expected number argument", this);
+				
+			NumberToken num = (NumberToken)tokens[0];
+			
+			return new NumberToken(Math.sqrt(num.doubleValue()));
 		}
 	};
 	

@@ -2,6 +2,19 @@ package com.tomtzook.interpreter4j;
 
 public class NumberToken extends Token{
 
+	//--------------------------------------------------------------------
+	//-----------------------MATH CONST-----------------------------------
+	//--------------------------------------------------------------------
+	
+	public static final VariableToken PI = new VariableToken("pi", new NumberToken(Math.PI), true);
+	public static final VariableToken E = new VariableToken("e", new NumberToken(Math.E), true);
+	
+	public static final NumberToken ZERO = new NumberToken(0);
+	
+	//--------------------------------------------------------------------
+	//-----------------------CLASS DEF------------------------------------
+	//--------------------------------------------------------------------
+	
 	private boolean floatingpoint;
 	
 	public NumberToken(double value) {

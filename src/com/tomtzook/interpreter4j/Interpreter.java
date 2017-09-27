@@ -1,9 +1,7 @@
 package com.tomtzook.interpreter4j;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -11,11 +9,10 @@ public class Interpreter {
 	
 	private Map<Object, OperatorToken> operators;
 	private Map<String, Function> functions;
-	private Map<String, VariableToken> variables;
+	private Map<Object, VariableToken> variables;
 	
 	private Queue<Token> lineTokens;
 	private Token currentToken;
-	private Token lastToken;
 	private String line;
 	private int pos, lineLength;
 	private int currentChar;
@@ -172,7 +169,6 @@ public class Interpreter {
 	}
 	
 	public void nextOpToken(){
-		lastToken = currentToken;
 		currentToken = (lineTokens.isEmpty())? null : lineTokens.remove();
 	}
 	public boolean eatToken(TokenType type){
@@ -185,6 +181,17 @@ public class Interpreter {
 	}
 	
 	public Token performFactor(){
+		if(eatOperator(OperatorType.Expression)){
+			if(currentToken.equals(OperatorToken.ADDITION)){
+				nextOpToken();
+				return performFactor();
+			}
+			if(currentToken.equals(OperatorToken.SUBTRACTION)){
+				nextOpToken();
+				return OperatorToken.SUBTRACTION.apply(NumberToken.ZERO, performFactor());
+			}
+		}
+		
 		Token result = null;
 		
 		if(currentToken.getType() == TokenType.Number || currentToken.getType() == TokenType.Boolean){
@@ -317,15 +324,16 @@ public class Interpreter {
 		Map<String, Function> map = new HashMap<String, Function>();
 		
 		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
-		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
+		map.put(Function.MATH_ABS.getName(), Function.MATH_ABS);
+		map.put(Function.MATH_SQRT.getName(), Function.MATH_SQRT);
 		
 		return map;
 	}
-	public static Map<String, VariableToken> createDefaultVariablesMap(){
-		Map<String, VariableToken> map = new HashMap<String, VariableToken>();
+	public static Map<Object, VariableToken> createDefaultVariablesMap(){
+		Map<Object, VariableToken> map = new HashMap<Object, VariableToken>();
 		
-		map.put("pi", new VariableToken("test", new NumberToken(Math.PI)));
-		map.put("test", new VariableToken("test", new NumberToken(1)));
+		map.put(NumberToken.PI.getToken(), NumberToken.PI);
+		map.put(NumberToken.E.getToken(), NumberToken.E);
 		
 		return map;
 	}
