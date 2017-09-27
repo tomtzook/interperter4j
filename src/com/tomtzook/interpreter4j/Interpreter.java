@@ -1,8 +1,7 @@
 package com.tomtzook.interpreter4j;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -29,6 +28,13 @@ public class Interpreter {
 	
 	public Program evaluate(List<String> lines){
 		Queue<Token> tokens = parser.parseTokens(lines);
+		
+		Map<Object, VariableToken> variables = new HashMap<Object, VariableToken>();
+		for (Iterator<Object> iterator = this.variables.keySet().iterator(); iterator.hasNext();) {
+			Object key = iterator.next();
+			variables.put(key, this.variables.get(key));
+		}
+		
 		return new Program(variables, tokens);
 	}
 	

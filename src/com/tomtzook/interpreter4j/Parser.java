@@ -52,6 +52,7 @@ public class Parser {
 			reset(line);
 	}
 	private void skipspaces(){
+		nextChar();
 		while(Character.isSpaceChar(currentChar))
 			nextChar();
 	}
@@ -105,16 +106,26 @@ public class Parser {
 				
 				List<Token> inblock = new ArrayList<Token>();
 				
-				Token token = nextToken();
-				while (token != null && token.getToken() != TokenType.Block_Close) {
-					inblock.add(token);
+				Token token = null;
+				while(currentLine < lines.size()){
+					
 					token = nextToken();
+					
+					while (token != null && token.getType() != TokenType.Block_Close) {
+						inblock.add(token);
+						token = nextToken();
+					}
+					
+					if(token != null && token.getType() == TokenType.Block_Close)
+						break;
+					
+					nextLine();
 				}
 				
 				if(token == null)
 					parsingError("Missing block closer");
 				
-				return new BlockToken((Token[]) inblock.toArray());
+				return new BlockToken(inblock.toArray(new Token[inblock.size()]));
 			}
 			if(currentChar == '}'){
 				nextChar();
@@ -147,6 +158,16 @@ public class Parser {
 	            	return new BooleanToken(true);
 	            }else if(val.equals("false")){
 	            	return new BooleanToken(false);
+	            }
+	            
+	            //is a special case
+	            if(val.equals("if")){
+	            	if(currentChar != '(')
+	            		parsingError("Missing if condition parentheses");
+	            	
+	            	//get condition
+	            	//get block
+	            	return new BlockConditionToken("if", null);
 	            }
 	            
 	            //is a function: we have parentheses

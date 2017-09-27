@@ -12,4 +12,9 @@ public class BlockToken extends Token{
 	public Token[] getTokens(){
 		return tokens;
 	}
+	
+	@Override
+	public String toString() {
+		return "{BLOCK: "+tokens.length+"}";
+	}
 }

@@ -1,5 +1,6 @@
 package com.tomtzook.interpreter4j;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,19 +8,20 @@ import java.util.Queue;
 
 public class Program {
 
+	private Map<Object, VariableToken> programVariables;
+	private Queue<Token> programTokens;
+	
 	private Map<Object, VariableToken> variables;
 	
 	private Queue<Token> tokens;
 	private Token currentToken;
 	
 	public Program(Map<Object, VariableToken> variables, Queue<Token> tokens){
-		this.tokens = tokens;
+		this.tokens = new ArrayDeque<Token>();
+		this.programTokens = tokens;
 		
 		this.variables = new HashMap<Object, VariableToken>();
-		for (Iterator<Object> iterator = variables.keySet().iterator(); iterator.hasNext();) {
-			Object key = iterator.next();
-			this.variables.put(key, variables.get(key));
-		}
+		this.programVariables = variables;
 	}
 	
 	private void operationError(String msg){
@@ -36,6 +38,15 @@ public class Program {
 		if(!eatToken(TokenType.Operator))
 			return false;
 		return ((OperatorToken)currentToken).getOperatorType() == type;
+	}
+	
+	private void performBlock(BlockToken block){
+		Token[] blocktokens = block.getTokens();
+		Queue<Token> tokens = new ArrayDeque<Token>(blocktokens.length);
+		for (int i = 0; i < blocktokens.length; i++)
+			tokens.add(blocktokens[i]);
+		Program program = new Program(variables, tokens);
+		program.run();
 	}
 	
 	private Token performFactor(){
@@ -106,6 +117,27 @@ public class Program {
 		else if(currentToken.getType() == TokenType.Argument_Separator){
 			return null;
 		}
+		else if(currentToken.getType() == TokenType.Block){
+			BlockToken block = (BlockToken)currentToken;
+			performBlock(block);
+			nextOpToken();
+		}
+		else if(currentToken.getType() == TokenType.Block_Condition){
+			nextOpToken();
+			Token token = performExpression();
+			
+			if(token == null || token.getType() != TokenType.Boolean)
+				operationError("Expected boolean condition");
+			
+			boolean condition = (boolean)token.getToken();
+			
+			if(!eatToken(TokenType.Block))
+				operationError("Expected code block");
+			
+			if(condition)
+				performBlock((BlockToken) currentToken);
+			nextOpToken();
+		}
 		
 		return result;
 	}
@@ -148,6 +180,15 @@ public class Program {
 	
 	
 	public void run(){
+		tokens.clear();
+		tokens.addAll(programTokens);
+		
+		variables.clear();
+		for (Iterator<Object> iterator = programVariables.keySet().iterator(); iterator.hasNext();) {
+			Object key = iterator.next();
+			this.variables.put(key, programVariables.get(key));
+		}
+		
 		performOperations();
 	}
 }
