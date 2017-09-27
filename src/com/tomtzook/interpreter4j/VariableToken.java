@@ -31,7 +31,7 @@ public class VariableToken extends Token{
 	
 	@Override
 	public String toString() {
-		return "{VARIABLE: "+getToken().toString()+", "+variableValue.toString()+"}";
+		return "{VARIABLE: "+getToken().toString()+", "+variableValue+"}";
 	}
 	
 	private static void assignmentException(String error, VariableToken variable){
