@@ -15,6 +15,9 @@ public class Token {
 	public static final Token UNARY_PLUS = new Token('+', TokenType.Unary_Plus);
 	public static final Token UNARY_MINUS = new Token('-', TokenType.Unary_Minus);
 	
+	public static final Token BLOCK_CONDITION = new Token("if", TokenType.Block_Condition);
+	public static final Token BLOCK_ELSE = new Token("else", TokenType.Block_Else);
+	
 	//--------------------------------------------------------------------
 	//-----------------------CLASS DEF------------------------------------
 	//--------------------------------------------------------------------

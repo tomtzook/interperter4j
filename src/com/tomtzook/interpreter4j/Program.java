@@ -134,9 +134,22 @@ public class Program {
 			if(!eatToken(TokenType.Block))
 				operationError("Expected code block");
 			
-			if(condition)
+			if(condition){
 				performBlock((BlockToken) currentToken);
+			}
 			nextOpToken();
+			
+			if(eatToken(TokenType.Block_Else)){
+				nextOpToken();
+				
+				if(!eatToken(TokenType.Block))
+					operationError("Expected code block");
+				
+				if(!condition){
+					performBlock((BlockToken) currentToken);
+				}
+				nextOpToken();
+			}
 		}
 		
 		return result;

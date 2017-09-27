@@ -33,10 +33,10 @@ public class Parser {
 		reset(lines.get(currentLine));
 	}
 	private void reset(String line){
-		pos = 0;
+		pos = -1;
 		lineLength = line.length();
-		currentChar = line.charAt(0);
 		this.line = line;
+		nextChar();
 	}
 	
 	private void parsingError(String msg){
@@ -167,7 +167,12 @@ public class Parser {
 	            	
 	            	//get condition
 	            	//get block
-	            	return new BlockConditionToken("if", null);
+	            	return Token.BLOCK_CONDITION;
+	            }
+	            if(val.equals("else")){
+	            	//get condition
+	            	//get block
+	            	return Token.BLOCK_ELSE;
 	            }
 	            
 	            //is a function: we have parentheses
