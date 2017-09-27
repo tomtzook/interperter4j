@@ -28,12 +28,12 @@ public abstract class OperatorToken extends Token{
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
 				operatorException("Expected number tokens", this);
 			
-			Object leftval = left.getToken();
-			Object rightval = right.getToken();
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
 			
-			if(leftval instanceof Double || rightval instanceof Double)
-				return new NumberToken((Double)leftval + (Double)rightval);
-			return new NumberToken((Integer)leftval + (Integer)rightval);
+			if(numl.isFloatingPoint() || numr.isFloatingPoint())
+				return new NumberToken(numl.doubleValue() + numr.doubleValue());
+			return new NumberToken(numl.intValue() + numr.intValue());
 		}
 	};
 	public static final OperatorToken SUBTRACTION = new OperatorToken("-", OperatorType.Expression){
@@ -42,12 +42,12 @@ public abstract class OperatorToken extends Token{
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
 				operatorException("Expected number tokens", this);
 			
-			Object leftval = left.getToken();
-			Object rightval = right.getToken();
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
 			
-			if(leftval instanceof Double || rightval instanceof Double)
-				return new NumberToken((Double)leftval - (Double)rightval);
-			return new NumberToken((Integer)leftval - (Integer)rightval);
+			if(numl.isFloatingPoint() || numr.isFloatingPoint())
+				return new NumberToken(numl.doubleValue() - numr.doubleValue());
+			return new NumberToken(numl.intValue() - numr.intValue());
 		}
 	};
 	public static final OperatorToken MULTIPLICATION = new OperatorToken("*", OperatorType.Term){
@@ -56,12 +56,12 @@ public abstract class OperatorToken extends Token{
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
 				operatorException("Expected number tokens", this);
 			
-			Object leftval = left.getToken();
-			Object rightval = right.getToken();
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
 			
-			if(leftval instanceof Double || rightval instanceof Double)
-				return new NumberToken((Double)leftval * (Double)rightval);
-			return new NumberToken((Integer)leftval * (Integer)rightval);
+			if(numl.isFloatingPoint() || numr.isFloatingPoint())
+				return new NumberToken(numl.doubleValue() * numr.doubleValue());
+			return new NumberToken(numl.intValue() * numr.intValue());
 		}
 	};
 	public static final OperatorToken DIVISION = new OperatorToken("/", OperatorType.Term){
@@ -70,12 +70,12 @@ public abstract class OperatorToken extends Token{
 			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
 				operatorException("Expected number tokens", this);
 			
-			Object leftval = left.getToken();
-			Object rightval = right.getToken();
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
 			
-			if(leftval instanceof Double || rightval instanceof Double)
-				return new NumberToken((Double)leftval / (Double)rightval);
-			return new NumberToken((Integer)leftval / (Integer)rightval);
+			if(numl.isFloatingPoint() || numr.isFloatingPoint())
+				return new NumberToken(numl.doubleValue() / numr.doubleValue());
+			return new NumberToken(numl.intValue() / numr.intValue());
 		}
 	};
 	

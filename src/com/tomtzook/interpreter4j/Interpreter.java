@@ -90,11 +90,17 @@ public class Interpreter {
 			//is parentheses
 			if(currentChar == '('){
 				nextChar();
-				return new Token('(', TokenType.Parentheses_L);
+				return Token.PARENTHESES_L;
 			}
 			if(currentChar == ')'){
 				nextChar();
-				return new Token(')', TokenType.Parentheses_R);
+				return Token.PARENTHESES_R;
+			}
+			
+			//is separator
+			if(currentChar == ','){
+				nextChar();
+				return Token.ARGUMENT_SEPARATOR;
 			}
 			
 			//is operator
@@ -129,6 +135,7 @@ public class Interpreter {
 	            if(currentChar == '('){
 	            	if(!functions.containsKey(val))
 	            		parsingError("Unknown function: "+val);
+	            	return new FunctionToken(functions.get(val));
 	            }
 	            
 	            //is a variable
@@ -209,6 +216,31 @@ public class Interpreter {
 				operationError("Expected parentheses closer");
 			nextOpToken();
 		}
+		else if(currentToken.getType() == TokenType.FunctionCall){
+			FunctionToken function = (FunctionToken) currentToken;
+			nextOpToken();
+			if(currentToken.getType() != TokenType.Parentheses_L)
+				operationError("Expected parentheses");
+			nextOpToken();
+			
+			int arguments = function.getFunction().getArgumentCount();
+			Token[] args = new Token[arguments];
+			int i;
+			for (i = 0; i < args.length; i++) {
+				Token token = performExpression();
+				nextOpToken();
+				if(token == null)
+					break;
+				args[i] = token;
+			}
+			if(i < args.length)
+				operationError("Expected "+arguments+" arguments for function "+function.getFunction());
+			
+			result = function.call(args);
+		}
+		else if(currentToken.getType() == TokenType.Argument_Separator){
+			return null;
+		}
 		
 		return result;
 	}
@@ -283,6 +315,9 @@ public class Interpreter {
 	}
 	public static Map<String, Function> createDefaultFunctionMap(){
 		Map<String, Function> map = new HashMap<String, Function>();
+		
+		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
+		map.put(Function.MATH_POW.getName(), Function.MATH_POW);
 		
 		return map;
 	}

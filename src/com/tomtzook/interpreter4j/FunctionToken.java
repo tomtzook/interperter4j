@@ -9,6 +9,10 @@ public class FunctionToken extends Token{
 		this.function = function;
 	}
 	
+	public Function getFunction(){
+		return function;
+	}
+	
 	public Token call(Token...args){
 		if(args.length != function.getArgumentCount())
 			functionException("Expected "+function.getArgumentCount()+" arguments", this);
