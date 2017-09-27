@@ -187,7 +187,7 @@ public class Interpreter {
 		else if(currentToken.getType() == TokenType.Variable){
 			VariableToken variable = (VariableToken)currentToken;
 			nextOpToken();
-			if(currentToken.getType() == TokenType.Operator && 
+			if(currentToken != null && currentToken.getType() == TokenType.Operator && 
 					currentToken.equals(OperatorToken.ASSIGNMENT)){
 				nextOpToken();
 				result = performExpression();
