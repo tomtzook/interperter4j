@@ -8,24 +8,24 @@ import java.util.Queue;
 
 public class Program {
 
-	private Map<Object, VariableToken> programVariables;
+	private Map<String, VariableToken> programVariables;
 	private Queue<Token> programTokens;
 	
-	private Map<Object, VariableToken> variables;
+	private Map<String, VariableToken> variables;
 	
 	private Queue<Token> tokens;
 	private Token currentToken;
 	
-	public Program(Map<Object, VariableToken> variables, Queue<Token> tokens){
+	public Program(Map<String, VariableToken> variables, Queue<Token> tokens){
 		this.tokens = new ArrayDeque<Token>();
 		this.programTokens = tokens;
 		
-		this.variables = new HashMap<Object, VariableToken>();
+		this.variables = new HashMap<String, VariableToken>();
 		this.programVariables = variables;
 	}
 	
 	private void operationError(String msg){
-		throw new RuntimeException("Operation Error:" + msg);
+		throw new RuntimeException("Operation Error: " + msg);
 	}
 	
 	private void nextOpToken(){
@@ -50,6 +50,8 @@ public class Program {
 	}
 	
 	private Token performFactor(){
+		if(currentToken == null)
+			return null;
 		if(eatOperator(OperatorType.Expression)){
 			if(currentToken.equals(OperatorToken.ADDITION)){
 				nextOpToken();
@@ -63,7 +65,8 @@ public class Program {
 		
 		Token result = null;
 		
-		if(currentToken.getType() == TokenType.Number || currentToken.getType() == TokenType.Boolean){
+		if(currentToken.getType() == TokenType.Number || currentToken.getType() == TokenType.Boolean ||
+				currentToken.getType() == TokenType.String){
 			result = currentToken;
 			nextOpToken();
 		}
@@ -77,6 +80,8 @@ public class Program {
 				result = OperatorToken.ASSIGNMENT.apply(variable, result);
 			}else{
 				result = variable.getValue();
+				if(result == null)
+					operationError("Variable is empty! "+variable.getName());
 			}
 		}
 		else if(eatOperator(OperatorType.Factor)){
@@ -110,7 +115,7 @@ public class Program {
 				args[i] = token;
 			}
 			if(i < args.length)
-				operationError("Expected "+arguments+" arguments for function "+function.getFunction());
+				operationError("Expected "+arguments+" arguments for function "+function.getFunction().getName());
 			
 			result = function.call(args);
 		}
@@ -184,8 +189,6 @@ public class Program {
 	private void performOperations(){
 		nextOpToken();
 		
-		performExpression();
-		
 		while(!tokens.isEmpty()){
 			performExpression();
 		}
@@ -211,8 +214,8 @@ public class Program {
 		tokens.addAll(programTokens);
 		
 		variables.clear();
-		for (Iterator<Object> iterator = programVariables.keySet().iterator(); iterator.hasNext();) {
-			Object key = iterator.next();
+		for (Iterator<String> iterator = programVariables.keySet().iterator(); iterator.hasNext();) {
+			String key = iterator.next();
 			this.variables.put(key, programVariables.get(key));
 		}
 		

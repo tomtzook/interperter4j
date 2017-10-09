@@ -81,6 +81,18 @@ public abstract class OperatorToken extends Token{
 			return new NumberToken(numl.intValue() / numr.intValue());
 		}
 	};
+	public static final OperatorToken MODULO = new OperatorToken("%", OperatorType.Term){
+		@Override
+		public Token apply(Token left, Token right) {
+			if(left.getType() != TokenType.Number || right.getType() != TokenType.Number)
+				operatorException("Expected number tokens", this);
+			
+			NumberToken numl = (NumberToken)left;
+			NumberToken numr = (NumberToken)right;
+			
+			return new NumberToken(numl.intValue() % numr.intValue());
+		}
+	};
 	
 	//--------------------------------------------------------------------
 	//--------------------------LOGICAL-----------------------------------

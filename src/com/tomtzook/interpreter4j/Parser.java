@@ -10,7 +10,7 @@ public class Parser {
 
 	private Map<Object, OperatorToken> operators;
 	private Map<String, Function> functions;
-	private Map<Object, VariableToken> variables;
+	private Map<String, VariableToken> variables;
 	
 	private List<String> lines;
 	private String line;
@@ -19,7 +19,7 @@ public class Parser {
 	private int currentChar;
 	
 	public Parser(Map<Object, OperatorToken> operators, Map<String, Function> functions,
-			Map<Object, VariableToken> variables) {
+			Map<String, VariableToken> variables) {
 		this.operators = operators;
 		this.functions = functions;
 		this.variables = variables;
@@ -40,7 +40,7 @@ public class Parser {
 	}
 	
 	private void parsingError(String msg){
-		throw new RuntimeException("Parsing Error("+pos+"): "+msg);
+		throw new RuntimeException("Parsing Error("+pos+", "+currentLine+"): "+msg);
 	}
 	
 	private void nextChar(){
@@ -131,6 +131,22 @@ public class Parser {
 				nextChar();
 				return Token.BLOCK_CLOSE;
 			}
+			if(currentChar == '"') {
+				nextChar();
+				
+				start = pos;
+				while(currentChar != 0 && currentChar != '"')
+					nextChar();
+				
+				if(currentChar == 0) 
+					parsingError("Expected string closer");
+				
+				nextChar();
+				
+				String value = line.substring(start, pos - 1);
+				
+				return new StringToken(value);
+			}
 			
 			//is operator
 			int chartype = Character.getType(currentChar);
@@ -149,7 +165,7 @@ public class Parser {
 			
 			//is a string: function, variable, boolean
 			if(Character.isAlphabetic(currentChar) || currentChar == '_'){
-	            while(Character.isAlphabetic(currentChar) || currentChar == '_') 
+	            while(Character.isAlphabetic(currentChar) || Character.isDigit(currentChar) || currentChar == '_') 
 	            	nextChar();
 	            String val = line.substring(start, this.pos);
 	            
@@ -174,6 +190,24 @@ public class Parser {
 	            	//get block
 	            	return Token.BLOCK_ELSE;
 	            }
+	            if(val.equals("def")){
+	    			if(Character.isWhitespace(currentChar)){
+	    				skipspaces();
+	    			}
+	    			
+	            	start = pos;
+		            while(Character.isAlphabetic(currentChar) || Character.isDigit(currentChar) || currentChar == '_') 
+		            	nextChar();
+		            
+		            val = line.substring(start, this.pos);
+		            
+		            if(variables.containsKey(val))
+		            	return variables.get(val);
+		            
+		            VariableToken var = new VariableToken(val);
+		            variables.put(val, var);
+		            return var;
+	            }
 	            
 	            //is a function: we have parentheses
 	            if(currentChar == '('){
@@ -183,10 +217,11 @@ public class Parser {
 	            }
 	            
 	            //is a variable
-	            if(!variables.containsKey(val)){
-	            	variables.put(val, new VariableToken(val));
+	            if(variables.containsKey(val)){
+	            	 return variables.get(val);
 	            }
-	            return variables.get(val);
+	            
+	            parsingError("Unexpected string: "+val);
 			}
 			
 			//unknown symbol

@@ -1,15 +1,17 @@
-if(antAngle <= 50){
-	speed(5)
+def angle = 0
+
+if(angle <= 50){
+	print(5)
 }
-if(antAngle >= 310){
-	speed(-5)
+if(angle >= 310){
+	print(-5)
 }
-if(antAngle > 50 && antAngle < 180){
-	angledeff(15*sin(antAngle))
+if(angle > 50 && angle < 180){
+	print(15*sin(angle))
 }
-if(antAngle > 180 && antAngle < 310){
-	angledeff(-15*sin(antAngle))
+if(angle > 180 && angle < 310){
+	print(-15*sin(angle))
 }
-if(antAngle == 180){
-	angledeff(0)
+if(angle == 180){
+	print(0)
 }
